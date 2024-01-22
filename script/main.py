@@ -84,7 +84,7 @@ for idx in range(param_init.Param.total_start_idx, param_init.Param.total_end_id
     update = Kk @ yk
     x_list[:, k + 1] = np.squeeze(X01 - update)
     cov_list[:, :, k + 1] = (np.eye(param_init.Param.state_size) - Kk @ H) @ P01
-    # print(k)
+    print(k)
 
 predict_state_list = x_list
 predict_position_list = predict_state_list[0:3, :]

@@ -12,7 +12,9 @@ import Data_Import
 print("Current Working Directory:", os.getcwd())
 
 
-def Lege_odom_func(x: np.ndarray, uk: np.ndarray, contact_mode: np.ndarray, dt: int) -> np.ndarray:
+def Lege_odom_func(x: np.ndarray, uk: np.ndarray, contact_mode: np.ndarray, cov_p: np.ndarray, joint_ang: np.ndarray,
+                   joint_vel: np.ndarray) -> np.ndarray:
+    dt = uk[-1, 0]
     X01 = np.array(cas_init.next_state_func(x, uk, dt))
     F = np.array(cas_init.process_jacobian_func(x, uk, dt))
     B = np.array(cas_init.control_jacobian_func(x, uk, dt))
@@ -55,18 +57,19 @@ def Lege_odom_func(x: np.ndarray, uk: np.ndarray, contact_mode: np.ndarray, dt: 
         R[i * param_init.Param.meas_per_leg + 6, i * param_init.Param.meas_per_leg + 6] = (
                 (1 + (1 - contact[i]) * 1e5) * param_init.Param.meas_n_foot_height * dt)
 
-    P01 = F @ cov_list[:, :, k] @ F.T + Q1 + B @ Q2 @ B.T
+    P01 = F @ cov_p @ F.T + Q1 + B @ Q2 @ B.T
     # print(P01)
-    hat_IMU_gyro = Data_Import.Gyro_body_IMU[idx, 1:]
-    hat_joint_ang = Data_Import.Joint_ang[idx, 1:]
-    hat_joint_vel = Data_Import.Joint_vel[idx, 1:]
-    hat_yawk = Data_Import.Orient_mocap_euler[idx, 3]
+    hat_IMU_gyro = uk[0:3, 0]
+    hat_joint_ang = joint_ang
+    hat_joint_vel = joint_vel
     yk = np.array(
-        cas_init.yk_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel, hat_yawk))  # measurement residual(Eq:46)
-    H = np.array(cas_init.H_jac_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel, hat_yawk))
+        cas_init.yk_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel))  # measurement residual(Eq:46)
+    H = np.array(cas_init.H_jac_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel))
     # print(yk)
     S = H @ P01 @ H.T + R
     Kk = P01 @ H.T @ np.linalg.inv(S)
     update = Kk @ yk
-    x_list[:, k + 1] = np.squeeze(X01 - update)
-    cov_list[:, :, k + 1] = (np.eye(param_init.Param.state_size) - Kk @ H) @ P01
+    x_ext = np.squeeze(X01 - update)
+    cov_ext = (np.eye(param_init.Param.state_size) - Kk @ H) @ P01
+
+    return x_ext, cov_ext
