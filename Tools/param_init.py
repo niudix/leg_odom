@@ -32,7 +32,7 @@ class Param:
     total_end_idx = total_step - 1
     total_start_time = extData.Accel_body_IMU[total_start_idx, 0]
     meas_per_leg = 7  # joint angle, joint velocity, foot height (3 joint each leg) 3,3,1
-    meas_size = meas_per_leg * num_leg + 1
+    meas_size = meas_per_leg * num_leg
 
 
     state_size = 28

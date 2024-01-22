@@ -12,7 +12,6 @@ import Data_Import
 
 import matplotlib.pyplot as plt
 
-
 X0 = param_init.Init.init_x
 N = param_init.Param.total_end_idx - param_init.Param.total_start_idx + 1
 P0 = param_init.Init.init_cov * np.eye(param_init.Param.state_size)
@@ -76,9 +75,9 @@ for idx in range(param_init.Param.total_start_idx, param_init.Param.total_end_id
     hat_IMU_gyro = Data_Import.Gyro_body_IMU[idx, 1:]
     hat_joint_ang = Data_Import.Joint_ang[idx, 1:]
     hat_joint_vel = Data_Import.Joint_vel[idx, 1:]
-    hat_yawk = Data_Import.Orient_mocap_euler[idx, 3]
-    yk = np.array(cas_init.yk_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel, hat_yawk))  # measurement residual(Eq:46)
-    H = np.array(cas_init.H_jac_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel, hat_yawk))
+    # hat_yawk = Data_Import.Orient_mocap_euler[idx, 3]
+    yk = np.array(cas_init.yk_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel))  # measurement residual(Eq:46)
+    H = np.array(cas_init.H_jac_Func(X01, hat_IMU_gyro, hat_joint_ang, hat_joint_vel))
     # print(yk)
     S = H @ P01 @ H.T + R
     Kk = P01 @ H.T @ np.linalg.inv(S)
@@ -90,10 +89,10 @@ for idx in range(param_init.Param.total_start_idx, param_init.Param.total_end_id
 predict_state_list = x_list
 predict_position_list = predict_state_list[0:3, :]
 predict_position_list = predict_position_list.T
-ground_truth_list = Data_Import.Pos_mocap[param_init.Param.total_start_idx:param_init.Param.total_end_idx+1, 1:]
+ground_truth_list = Data_Import.Pos_mocap[param_init.Param.total_start_idx:param_init.Param.total_end_idx + 1, 1:]
 # print(predict_state_list)
 
-#plot
+# plot
 # Plotting the graph
 plt.figure(figsize=(10, 8))
 # Plotting the real position
@@ -108,4 +107,3 @@ plt.xlabel('X Position')
 plt.ylabel('Y Position')
 # Displaying the graph
 plt.show()
-

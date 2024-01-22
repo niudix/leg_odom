@@ -9,7 +9,7 @@ s_dt = ca.MX.sym('dt', 1)
 ca_hat_IMU_gyro = ca.MX.sym('ca_hat_IMU_gyro', 3)
 ca_hat_joint_ang = ca.MX.sym('ca_hat_joint_ang', 12)
 ca_hat_joint_vel = ca.MX.sym('ca_hat_joint_vel', 12)
-yawk = ca.MX.sym('yawk', 1)
+# yawk = ca.MX.sym('yawk', 1)
 euler_ang = ca.MX.sym('euler_ang', 3)
 
 
@@ -155,7 +155,7 @@ for i in range(parm.Param.num_leg):
     meas_residual[i * meas_per_leg + 6] = foot_pos[i * 3 + 2]  # foot_height(foot position coordinate axis z)
 
     # meas_residual[-1]=注意：这里没有引用动作捕捉系统
-    meas_residual[-1] = yawk - euler[2]
+    # meas_residual[-1] = yawk - euler[2]
 # test--------------------------------------------------------
 
 
@@ -169,7 +169,6 @@ next_state_func = ca.Function('next_state_func', [s_xk, s_uk, s_dt], [s_f])
 process_jacobian_func = ca.Function('process_jacobian_func', [s_xk, s_uk, s_dt], [process_jac])
 control_jacobian_func = ca.Function('control_jacobian_func', [s_xk, s_uk, s_dt], [control_jac])
 
-yk_Func = ca.Function('yk_Func', [s_xk, ca_hat_IMU_gyro, ca_hat_joint_ang, ca_hat_joint_vel, yawk], [meas_residual])
-H_jac_Func = ca.Function('H_jac_Func', [s_xk, ca_hat_IMU_gyro, ca_hat_joint_ang, ca_hat_joint_vel, yawk], [H_jac])
+yk_Func = ca.Function('yk_Func', [s_xk, ca_hat_IMU_gyro, ca_hat_joint_ang, ca_hat_joint_vel], [meas_residual])
+H_jac_Func = ca.Function('H_jac_Func', [s_xk, ca_hat_IMU_gyro, ca_hat_joint_ang, ca_hat_joint_vel], [H_jac])
 euler_to_rot_Func = ca.Function('euler_to_rot_Func', [euler_ang], [R_mtx])
-
