@@ -1,0 +1,68 @@
+import rospy
+import csv
+import os
+from sensor_msgs.msg import JointState
+
+# Specify the base directory for storing CSV files
+base_directory = '/home/ndx/catkin_odom/src/leg_odom/assets/csv_file'  # Change this path to your desired directory
+
+def write_to_csv(file_name, headers, data_dict):
+    file_path = os.path.join(base_directory, file_name)
+    with open(file_path, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        writer.writerow(data_dict)
+
+def callback(data):
+    # Calculate the time from the ROS timestamp
+    time = data.header.stamp.secs + data.header.stamp.nsecs / 1e9
+    
+    # Prepare data dictionaries for position, velocity, and effort
+    position_dict = {'time': time}
+    velocity_dict = {'time': time}
+    effort_dict = {'time': time}
+    
+    # Populate the dictionaries
+    for i, name in enumerate(data.name):
+        position_dict[name] = data.position[i] if i < len(data.position) else None
+        velocity_dict[name] = data.velocity[i] if i < len(data.velocity) else None
+        effort_dict[name] = data.effort[i] if i < len(data.effort) else None
+
+    # Write to the respective CSV files
+    write_to_csv('position_data.csv', position_headers, position_dict)
+    write_to_csv('velocity_data.csv', velocity_headers, velocity_dict)
+    write_to_csv('effort_data.csv', effort_headers, effort_dict)
+
+def listener():
+    # Initialize the node
+    rospy.init_node('joint_listener', anonymous=True)
+
+    # Create a subscriber to the specified topic
+    sub_joint = rospy.Subscriber("/joint_foot", JointState, callback)
+
+    # Keep the script running until it's shut down
+    rospy.spin()
+
+if __name__ == '__main__':
+    # Define joint names
+    joint_names = [
+        "FL_0", "FL_1", "FL_2", "FR_0", "FR_2",
+        "RL_0", "RL_1", "RL_2", "RR_0", "RR_1", "RR_2",
+        "Foot_0", "Foot_1", "Foot_2", "Foot_3"
+    ]
+
+    # Create headers for each type of data
+    position_headers = ['time'] + joint_names
+    velocity_headers = ['time'] + joint_names
+    effort_headers = ['time'] + joint_names
+
+    # Ensure the directory exists
+    if not os.path.exists(base_directory):
+        os.makedirs(base_directory)
+
+    # Initialize CSV files with headers
+    write_to_csv('position_data.csv', position_headers, {})
+    write_to_csv('velocity_data.csv', velocity_headers, {})
+    write_to_csv('effort_data.csv', effort_headers, {})
+
+    # Start the listener
+    listener()

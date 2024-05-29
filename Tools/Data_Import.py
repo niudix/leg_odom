@@ -4,6 +4,7 @@ import numpy as np
 
 # define robot motion data
 Data_path = '../assets/SIPO_Data'
+# Data_path = 'home/marmot/dixiao/catkin_legodom/src/legodom/assets/SIPO_Data'
 
 file_Accel_body_IMU = os.path.join(Data_path, 'Accel_body_IMU.csv')
 file_Gyro_body_IMU = os.path.join(Data_path, 'Gyro_body_IMU.csv')

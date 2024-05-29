@@ -3,7 +3,6 @@ import os
 import sys
 
 sys.path.append('../Tools')
-sys.path.append('/home/marmot/dixiao/catkin_ws/src/odom/leg_odom/Tools')
 
 print("Current Working Directory:", os.getcwd())
 
